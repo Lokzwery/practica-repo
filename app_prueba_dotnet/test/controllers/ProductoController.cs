@@ -24,12 +24,16 @@ public class ProductoController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Producto>> PostProducto(Producto producto)
+public async Task<ActionResult<Producto>> PostProducto([FromBody] Producto producto) // Agregado [FromBody]
+{
+    if (producto == null)
     {
-        _context.Productos.Add(producto);
-        await _context.SaveChangesAsync();
-        
-        // Devuelve un 201 Created y el objeto
-        return CreatedAtAction(nameof(GetProductos), new { id = producto.Id }, producto);
+        return BadRequest("El producto no puede ser nulo.");
     }
+
+    _context.Productos.Add(producto);
+    await _context.SaveChangesAsync();
+    
+    return CreatedAtAction(nameof(GetProductos), new { id = producto.Id }, producto);
+}
 }
