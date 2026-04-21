@@ -36,4 +36,50 @@ public async Task<ActionResult<Producto>> PostProducto([FromBody] Producto produ
     
     return CreatedAtAction(nameof(GetProductos), new { id = producto.Id }, producto);
 }
+
+// UPDATE: Actualizar un producto existente (PUT)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> PutProducto(int id, [FromBody] Producto producto)
+    {
+        if (id != producto.Id)
+        {
+            return BadRequest("El ID no coincide con el producto.");
+        }
+
+        _context.Entry(producto).State = EntityState.Modified;
+
+        try
+        {
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!_context.Productos.Any(e => e.Id == id))
+            {
+                return NotFound("El producto no existe.");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        return NoContent(); // Devuelve un 204 si todo salió bien
+    }
+
+    // DELETE: Eliminar un producto (DELETE)
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteProducto(int id)
+    {
+        var producto = await _context.Productos.FindAsync(id);
+        if (producto == null)
+        {
+            return NotFound("Producto no encontrado.");
+        }
+
+        _context.Productos.Remove(producto);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
